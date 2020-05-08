@@ -67,12 +67,12 @@ def verify_decode_jwt(token):
     '''
     # Get the public keys for RSA from Auth0 here:
     json_url = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
-    jwks = json.loads(json_urlread())
+    jwks = json.loads(json_url.read())
     unverified_header = jwt.get_unverified_header(token)    # Gets the header, but hasn't verified anything (don't trust it!)
     
     # We need to search for the RSA public key id ("kid") that matches the public keys
     # over at the Auth0.com/well-known/jwks.json link
-
+    
     # Example of a header for one of our tokens:
     # unverified_header = {
     #     "alg": "RS256",
@@ -137,7 +137,6 @@ def verify_decode_jwt(token):
 
 
 '''
-@TODO implement check_permissions(permission, payload) method
     @INPUTS
         permission: string permission (i.e. 'post:drink')
         payload: decoded jwt payload
@@ -148,12 +147,40 @@ def verify_decode_jwt(token):
     return true otherwise
 '''
 def check_permissions(permission, payload):
-    raise Exception('Not Implemented')
+    # At this point we can trust the payload
 
+    # Example of payload formatting:
+    # {
+    #     "iss": "https://fsnd-joel.auth0.com/",
+    #     "sub": "auth0|5eb46b5f6b69bc0c1200896b",
+    #     "aud": "coffee_api",
+    #     "iat": 1588941926,
+    #     "exp": 1589028326,
+    #     "azp": "Q3OOJUkbDk1guLXFPqFMtmuZVqm9EAPq",
+    #     "scope": "",
+    #     "permissions": [
+    #         "delete:drinks",
+    #         "get:drinks-detail",
+    #         "patch:drinks",
+    #         "post:drinks"
+    #     ]
+    # }
+    if 'permissions' not in payload:
+        raise AuthError({
+                'code': 'invalid_token',
+                'description': 'Unable to find permissions.'
+        }, 400)
+
+    if permission not in payload['permissions']:
+        raise AuthError({
+                'code': 'forbidden',
+                'description': 'User does not have required permissions.'
+        }, 403)
+
+    return True
 
 
 '''
-@TODO implement @requires_auth(permission) decorator method
     @INPUTS
         permission: string permission (i.e. 'post:drink')
 
@@ -161,15 +188,15 @@ def check_permissions(permission, payload):
     it should use the verify_decode_jwt method to decode the jwt
     it should use the check_permissions method to validate claims and check the requested permission
     return the decorator which passes the decoded payload to the decorated method
+
+    Call it with:  @requires_auth('get:drinks-detail')
 '''
 def requires_auth(permission=''):
     def requires_auth_decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
             token = get_token_auth_header()
-            print(f"Token is: {token}")
             payload = verify_decode_jwt(token)
-            print(f"Payload is: {payload}")
             check_permissions(permission, payload)
             return f(payload, *args, **kwargs)
 
