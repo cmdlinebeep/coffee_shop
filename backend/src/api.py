@@ -75,36 +75,72 @@ CORS(app)
 '''
 
 
-## Error Handling
-'''
-Example error handling for unprocessable entity
-'''
+## Error Handling.  Returns tuple of JSON data and integer status code
+@app.errorhandler(400)
+def bad_request(error):
+    '''Server cannot process request due to client error, such as malformed request'''
+    return jsonify({
+        "success": False, 
+        "error": 400,
+        "message": "bad request"
+        }), 400
+
+@app.errorhandler(401)
+def unauthorized(error):
+    '''Authentication has not yet been provided'''
+    return jsonify({
+        "success": False, 
+        "error": 401,
+        "message": "unauthorized"
+        }), 401
+
+@app.errorhandler(403)
+def forbidden(error):
+    '''Server is refusing action, often because user does not have permissions for request'''
+    return jsonify({
+        "success": False, 
+        "error": 403,
+        "message": "forbidden"
+        }), 403
+
+@app.errorhandler(404)
+def not_found(error):
+    '''Requested resource could not be found on the server'''
+    return jsonify({
+        "success": False, 
+        "error": 404,
+        "message": "not found"
+        }), 404
+
+@app.errorhandler(405)
+def method_not_allowed(error):
+    '''Request method (i.e. GET or POST) is not allowed for this resource'''
+    return jsonify({
+        "success": False, 
+        "error": 405,
+        "message": "method not allowed"
+        }), 405
+
 @app.errorhandler(422)
 def unprocessable(error):
+    '''The request was well-formed but unable to be followed due to semantic errors'''
     return jsonify({
-                    "success": False, 
-                    "error": 422,
-                    "message": "unprocessable"
-                    }), 422
+        "success": False, 
+        "error": 422,
+        "message": "unprocessable"
+        }), 422
 
-'''
-@TODO implement error handlers using the @app.errorhandler(error) decorator
-    each error handler should return (with approprate messages):
-             jsonify({
-                    "success": False, 
-                    "error": 404,
-                    "message": "resource not found"
-                    }), 404
-
-'''
-
-'''
-@TODO implement error handler for 404
-    error handler should conform to general task above 
-'''
-
+@app.errorhandler(500)
+def server_error(error):
+    '''Catch-all for server error on our end'''
+    return jsonify({
+        "success": False, 
+        "error": 500,
+        "message": "internal server error"
+        }), 500
 
 '''
 @TODO implement error handler for AuthError
     error handler should conform to general task above 
 '''
+# Isn't this done already in auth.py?
