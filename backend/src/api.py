@@ -12,11 +12,10 @@ setup_db(app)
 CORS(app)
 
 '''
-@TODO uncomment the following line to initialize the datbase
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 '''
-# db_drop_and_create_all()
+db_drop_and_create_all()
 
 ## ROUTES
 '''
@@ -55,7 +54,7 @@ def get_drinks():
 @app.route('/drinks-detail')
 @requires_auth(permission='get:drinks-detail')
 def get_drinks_detail(payload):     # We don't use the payload but the decorator returns it
-    try:
+    try:                            # Any function that calls the requires_auth will need payload, and maybe other arguments
         # Only Managers and Baristas should see our top-secret recipe
         drinks = Drink.query.all()
 
@@ -73,7 +72,6 @@ def get_drinks_detail(payload):     # We don't use the payload but the decorator
 
 
 '''
-@TODO implement endpoint
     POST /drinks
         it should create a new row in the drinks table
         it should require the 'post:drinks' permission
@@ -84,26 +82,46 @@ def get_drinks_detail(payload):     # We don't use the payload but the decorator
 @app.route('/drinks', methods=["POST"])
 @requires_auth(permission='post:drinks')
 def post_drink(payload):
-    # Get the recipe from the body data
-    pass
+    # Get the body data
+    body = request.json
 
-#     new_drink = Drink()
+    # Need to have title and recipe keys in body
+    # if ('title' not in body) or ('recipe' not in body):
+    if not all([ x in body for x in ['title', 'recipe'] ]):
+        abort(422)
 
+    # Grab the elements
+    drink_title = body['title']
+    drink_recipe = body['recipe']
 
+    # Make sure recipe is a list
+    if not isinstance(drink_recipe, list):
+        abort(422)
 
-# use dumps to convert json to a string
+    # Check recipe for correct long format.  
+    # Each ingredient in the list needs a name, color, and parts
+    for ingredient in drink_recipe:
+        # if ('name' not in ingredient) or ('color' not in ingredient) or ('parts' not in ingredient):
+        if not all([ x in ingredient for x in ['name', 'color', 'parts'] ]):
+            abort(422)
 
-# title = Column(String(80), unique=True)
-#     # the ingredients blob - this stores a lazy json blob
-#     # the required datatype is [{'color': string, 'name':string, 'parts':number}]   # NOTE: Here they are storing a list of dictionaries as a string for the recipe
-#     recipe =  Column(String(180), nullable=False)
+    # Format the drink_recipe as a string for the database (opposite of when we use loads)
+    drink_recipe = json.dumps(drink_recipe)
 
-
-
-# FIXME: Keep an eye out someday for a postman test that isn't looking for an array (but should be!)
+    try:
+        drink = Drink(title=drink_title, recipe=drink_recipe)
+        drink.insert()
+    except Exception as e:
+        print(f'Exception in post_drink(): {e}')
+        abort(422)  # Understood it all, but can't process for semantic reasons.  Often because drink name needs to be unique.
+    
+    return jsonify({
+        "success": True,
+        "drinks": [drink.long()]    # Returns an array with just the newly created drink
+    })
+   
 
 '''
-@TODO implement endpoint
     PATCH /drinks/<id>
         where <id> is the existing model id
         it should respond with a 404 error if <id> is not found
@@ -115,12 +133,51 @@ def post_drink(payload):
 '''
 @app.route('/drinks/<int:id>', methods=['PATCH'])
 @requires_auth(permission='patch:drinks')
-def edit_drink():
-    pass
+def edit_drink(payload, id):
+    # Get the drink referred to
+    drink = Drink.query.get(id)
+    if not drink:
+        abort(404)
+
+    # Get the body data
+    body = request.json
+
+    # Here we can update title OR recipe (or both).  Require at least one to be True
+    if not any([ x in body for x in ['title', 'recipe'] ]):
+        abort(422)
+
+    if 'title' in body:
+        drink.title = body['title']
+    if 'recipe' in body:
+        drink_recipe = body['recipe']
+
+        # Make sure recipe is a list
+        if not isinstance(drink_recipe, list):
+            abort(422)
+
+        # Check recipe for correct long format.  
+        # Each ingredient in the list needs a name, color, and parts
+        for ingredient in drink_recipe:
+            if not all([ x in ingredient for x in ['name', 'color', 'parts'] ]):
+                abort(422)
+
+        # Format the drink_recipe as a string for the database (opposite of when we use loads)
+        drink_recipe = json.dumps(drink_recipe)
+        drink.recipe = drink_recipe
+
+    try:
+        drink.update()
+    except Exception as e:
+        print(f'Exception in edit_drink(): {e}')
+        abort(422)  # Understood it all, but can't process for semantic reasons.
+
+    return jsonify({
+        "success": True,
+        "drinks": [drink.long()]    # Here contains a list with just the updated drink
+    })
 
 
 '''
-@TODO implement endpoint
     DELETE /drinks/<id>
         where <id> is the existing model id
         it should respond with a 404 error if <id> is not found
@@ -131,9 +188,22 @@ def edit_drink():
 '''
 @app.route('/drinks/<int:id>', methods=['DELETE'])
 @requires_auth(permission='delete:drinks')
-def delete_drink():
-    pass
+def delete_drink(payload, id):
+    # Get the drink referred to
+    drink = Drink.query.get(id)
+    if not drink:
+        abort(404)
 
+    try:
+        drink.delete()
+    except Exception as e:
+        print(f'Exception in delete_drink(): {e}')
+        abort(422)  # Understood it all, but can't process for semantic reasons.
+
+    return jsonify({
+        "success": True,
+        "delete": id
+    })
 
 
 ## Error Handling.  Returns tuple of JSON data and integer status code
