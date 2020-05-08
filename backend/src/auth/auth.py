@@ -12,7 +12,7 @@ API_AUDIENCE = 'coffee_api'
 ## AuthError Exception
 '''
 AuthError Exception
-A standardized way to communicate auth failure modes
+A standardized way to communicate auth failure modes (different than standard aborts)
 '''
 class AuthError(Exception):
     def __init__(self, error, status_code):
@@ -91,6 +91,9 @@ def verify_decode_jwt(token):
     # Example of what's in the Auth0 well-known public key info:
     # {"keys":[{"alg":"RS256","kty":"RSA","use":"sig","n":"w9CF0v8rEww9B4NaiyMUPJ_-sIKEeWxjSh6JamI3-qZ_hSfZqorcm1hcp7gbTrhG8BLHpzx82xuS_PfV_aiCVjjLngacW1xdQD32UlglxEpoi6LKYM9mLDPJRWgOIFwO-DWLKruNhDwc3AXKT5-9ejdk0Gx0mPGO-vkqjGmNPZyI-KzrZrPswC14ypYtQPfXsS5VRakS_DBzwRnBRcPJMFWS3vX3iF0vG1RXGQ48HT7yDh2949NcBjjxYloIgSm-WhgrEbgQQ_rQpSSZKVmmQ4scYbmdMagteIV2VdyJ5BDEt2TVmls-Tvdf9JOj13Bv-hAkwj5yDA6nOJ-QCVaWuQ","e":"AQAB","kid":"Jyh1-4Bv8DT-dLVtnbI58","x5t":"7QlBTRbEJ133POejU9QVtZ4Weo8","x5c":["MIIDATCCAemgAwIBAgIJInNp0lgnhR/BMA0GCSqGSIb3DQEBCwUAMB4xHDAaBgNVBAMTE2ZzbmQtam9lbC5hdXRoMC5jb20wHhcNMjAwNTA0MjEyNTAwWhcNMzQwMTExMjEyNTAwWjAeMRwwGgYDVQQDExNmc25kLWpvZWwuYXV0aDAuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAw9CF0v8rEww9B4NaiyMUPJ/+sIKEeWxjSh6JamI3+qZ/hSfZqorcm1hcp7gbTrhG8BLHpzx82xuS/PfV/aiCVjjLngacW1xdQD32UlglxEpoi6LKYM9mLDPJRWgOIFwO+DWLKruNhDwc3AXKT5+9ejdk0Gx0mPGO+vkqjGmNPZyI+KzrZrPswC14ypYtQPfXsS5VRakS/DBzwRnBRcPJMFWS3vX3iF0vG1RXGQ48HT7yDh2949NcBjjxYloIgSm+WhgrEbgQQ/rQpSSZKVmmQ4scYbmdMagteIV2VdyJ5BDEt2TVmls+Tvdf9JOj13Bv+hAkwj5yDA6nOJ+QCVaWuQIDAQABo0IwQDAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBTzaPKVp59kjbd+2kE+F6E04jqOhTAOBgNVHQ8BAf8EBAMCAoQwDQYJKoZIhvcNAQELBQADggEBABoWZrJ4/lJA1eJL0Y4FQODZzqSmjzVUDPo26pL5gdGNUXcG1/xgc06hR4Qm+T1YVnOI1hPseMPfxexJBKTe5b9XsIICV7w18cekK/B/T48Qjl/M83Dc3Zcihs4jVMqEzkKuXasLokTEOKZOwTaa/1pKT1KWFF7EnFuCd6v2m8M9RvNDzsDlXO5mU1td58jjaWRtm/2a/6fe7QlgM4bRpBBqGzEgSjnqISYsNivE0zUOJQ7KYSL7JcRzk8kSm9Zh/eWQR2bgjZaGs2mO+8UzO67L4DzK0CpR9Ekf/nkNKeYCspkg1lPq0gonx6ZcgYGBjkj/8dhhwpcgxbkZ0DQEgds="]},{"alg":"RS256","kty":"RSA","use":"sig","n":"9iDfevFYfFg1KiaPQrsMgzrUd_CXqGOetgCICYdJ5bhDFwKR3F-dvM0lyUZqMh1gzRXxp9SYRCn4eIZqOzHP5-3oAjyZLtmq3kcYHDamsyvOP8fCoqLmIRFa8fPCtBVUC2HL54FHHQCJic_aSHItnL8O1WvDn6Z598_mXkZk38esaJ7v_MpnMUk5EhbQrygWe0wLEbjmfNOnqVtDhoSh7WXl7CeeUjmCPPyISqczqkoPWUAAu5D0O4MQpxzaG3lybDtqaDeRO2vQeNMSjtvrheUvmnBArbozXYS4l0h6PsKJ_S-NZUjIVvaUR-U7kbREbbN7YfcFUceWVsJnoQjfyQ","e":"AQAB","kid":"PD2XrYfU_sdLuZTPbHMKn","x5t":"ugzQE7Uk10LZ-q4urzJEi3o-DDw","x5c":["MIIDATCCAemgAwIBAgIJZV/UKPmJr79uMA0GCSqGSIb3DQEBCwUAMB4xHDAaBgNVBAMTE2ZzbmQtam9lbC5hdXRoMC5jb20wHhcNMjAwNTA0MjEyNTAwWhcNMzQwMTExMjEyNTAwWjAeMRwwGgYDVQQDExNmc25kLWpvZWwuYXV0aDAuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA9iDfevFYfFg1KiaPQrsMgzrUd/CXqGOetgCICYdJ5bhDFwKR3F+dvM0lyUZqMh1gzRXxp9SYRCn4eIZqOzHP5+3oAjyZLtmq3kcYHDamsyvOP8fCoqLmIRFa8fPCtBVUC2HL54FHHQCJic/aSHItnL8O1WvDn6Z598/mXkZk38esaJ7v/MpnMUk5EhbQrygWe0wLEbjmfNOnqVtDhoSh7WXl7CeeUjmCPPyISqczqkoPWUAAu5D0O4MQpxzaG3lybDtqaDeRO2vQeNMSjtvrheUvmnBArbozXYS4l0h6PsKJ/S+NZUjIVvaUR+U7kbREbbN7YfcFUceWVsJnoQjfyQIDAQABo0IwQDAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBSvFFz/6dgaDMtcs0GP13J6OuFFmjAOBgNVHQ8BAf8EBAMCAoQwDQYJKoZIhvcNAQELBQADggEBAC/BD3IOVR4lf31yLyE7I2sIiZOG1ttze/5iwtnUElfeMhR9T2OXGFov+Q2AHDs2uWLuLitK3dfXx0Bz1TTJ21XPCuQuWa2msiMsksjZB+R/R1YgQzXmEfgKBp3oxEZhcEmtLcE4t6GyGAJtHu2/UgRHbwHiX2Nsu3myrAqXqUVpw3f7EPCy/6OuXnFzM6vi5welTI8HyMFqgEnnjbi+Ht0n/xsQDwE6K9UOXy+QKjq1aFXhQ+J/xJQUDi1Wz5zp5/QLpJ8Tnr5eEWIAggH6TE8m+zWbvRcUC/OAatDe0asHMqgcm8VcMn97xZdRyrJWRL2qcnhdqmaw0FFIhGWMAks="]}]}
     for key in jwks['keys']:
+
+        # print(f"key kid: {key['kid']}")   # Debugging why rsa_key not found
+
         if key['kid'] == unverified_header['kid']:
             rsa_key = {
                 'kty': key['kty'],

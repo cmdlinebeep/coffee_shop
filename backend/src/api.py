@@ -20,7 +20,6 @@ CORS(app)
 
 ## ROUTES
 '''
-@TODO implement endpoint
     GET /drinks
         it should be a public endpoint
         it should contain only the drink.short() data representation
@@ -28,19 +27,49 @@ CORS(app)
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks')
-@requires_auth()
 def get_drinks():
-    abort(400)
+    try:
+        # Anyone can get the drinks list, so don't decorate with requires_auth()
+        drinks = Drink.query.all()
+
+        # Frontend expects a LIST of drinks (formatted as short() since doesn't need component name details)
+        # Could be many drinks on the menu
+        drinks = [drink.short() for drink in drinks]
+
+        return ({
+            'success': True,
+            'drinks': drinks
+        })
+    
+    except:
+        abort(500)  # Catchall
 
 
 '''
-@TODO implement endpoint
     GET /drinks-detail
         it should require the 'get:drinks-detail' permission
         it should contain the drink.long() data representation
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks-detail')
+@requires_auth(permission='get:drinks-detail')
+def get_drinks_detail(payload):     # We don't use the payload but the decorator returns it
+    try:
+        # Only Managers and Baristas should see our top-secret recipe
+        drinks = Drink.query.all()
+
+        # Here Frontend expects a list of drinks but with the long() formatting (which includes
+        # more details on the recipe names of ingredients)
+        drinks = [drink.long() for drink in drinks]
+
+        return ({
+            'success': True,
+            'drinks': drinks
+        })
+    
+    except:
+        abort(500)  # Catchall
 
 
 '''
@@ -52,7 +81,26 @@ def get_drinks():
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks', methods=["POST"])
+@requires_auth(permission='post:drinks')
+def post_drink(payload):
+    # Get the recipe from the body data
+    pass
 
+#     new_drink = Drink()
+
+
+
+# use dumps to convert json to a string
+
+# title = Column(String(80), unique=True)
+#     # the ingredients blob - this stores a lazy json blob
+#     # the required datatype is [{'color': string, 'name':string, 'parts':number}]   # NOTE: Here they are storing a list of dictionaries as a string for the recipe
+#     recipe =  Column(String(180), nullable=False)
+
+
+
+# FIXME: Keep an eye out someday for a postman test that isn't looking for an array (but should be!)
 
 '''
 @TODO implement endpoint
@@ -65,6 +113,10 @@ def get_drinks():
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks/<int:id>', methods=['PATCH'])
+@requires_auth(permission='patch:drinks')
+def edit_drink():
+    pass
 
 
 '''
@@ -77,9 +129,28 @@ def get_drinks():
     returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks/<int:id>', methods=['DELETE'])
+@requires_auth(permission='delete:drinks')
+def delete_drink():
+    pass
+
 
 
 ## Error Handling.  Returns tuple of JSON data and integer status code
+
+'''
+    error handler should conform to general task above 
+'''
+@app.errorhandler(AuthError)
+def auth_error(excpt):
+    # This decorator is called when an exception is thrown of AuthError type
+    # (unlike standard aborts which accept integer status error codes)
+    # This is for authentication errors only (our decorator)
+    response = jsonify(excpt.error)
+    response.status_code = excpt.status_code
+    return response
+
+
 @app.errorhandler(400)
 def bad_request(error):
     '''Server cannot process request due to client error, such as malformed request'''
@@ -142,9 +213,3 @@ def server_error(error):
         "error": 500,
         "message": "internal server error"
         }), 500
-
-'''
-@TODO implement error handler for AuthError
-    error handler should conform to general task above 
-'''
-# Isn't this done already in auth.py?

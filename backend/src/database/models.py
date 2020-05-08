@@ -48,6 +48,7 @@ class Drink(db.Model):
     '''
     def short(self):
         print(json.loads(self.recipe))
+        # Filters out the 'name' portion for the short recipe, not needed for displaying only (GET /drinks)
         short_recipe = [{'color': r['color'], 'parts': r['parts']} for r in json.loads(self.recipe)]
         return {
             'id': self.id,
@@ -60,6 +61,7 @@ class Drink(db.Model):
         long form representation of the Drink model
     '''
     def long(self):
+        # Includes the 'name' part of the recipe, used for GET /drink-details
         return {
             'id': self.id,
             'title': self.title,
@@ -81,7 +83,7 @@ class Drink(db.Model):
 
     '''
     delete()
-        deletes a new model into a database
+        deletes a model from a database
         the model must exist in the database
         EXAMPLE
             drink = Drink(title=req_title, recipe=req_recipe)
@@ -93,7 +95,7 @@ class Drink(db.Model):
 
     '''
     update()
-        updates a new model into a database
+        updates a model in the database
         the model must exist in the database
         EXAMPLE
             drink = Drink.query.filter(Drink.id == id).one_or_none()
