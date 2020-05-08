@@ -6,6 +6,7 @@ test.db
 # Joel
 notes.txt
 *.code-workspace
+*.png
 node_modules/
 
 # OS generated files #

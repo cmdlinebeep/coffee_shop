@@ -1,5 +1,4 @@
-/* @TODO replace with your variables
- * ensure all variables on this page match your project
+/* ensure all variables on this page match your project
  */
 
 export const environment = {
